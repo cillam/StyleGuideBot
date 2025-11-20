@@ -1,0 +1,4 @@
+# For local development/testing
+black
+flake8
+pytest
