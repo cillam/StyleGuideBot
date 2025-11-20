@@ -8,9 +8,19 @@ RAG-based style guide assistant with FastAPI backend and React frontend, deploye
 
 ## Tech Stack
 
-**Backend:** FastAPI, LangChain, OpenAI, Chroma
-**Frontend:** React, Vite, TailwindCSS
-**Deployment:** AWS Lambda, S3, CloudFront, API Gateway
+**Backend:**
+- FastAPI
+- LangChain
+- OpenAI API (GPT-4 + embeddings)
+- Chroma Vector DB
+
+**Frontend:**
+- React (Vite)
+
+**Deployment:**
+- AWS Lambda (backend)
+- AWS S3 + CloudFront (frontend)
+- AWS API Gateway
 
 ## Project Structure
 
@@ -39,9 +49,8 @@ npm run dev
 
 ## Deployment
 
-See `/infrastructure/README.md` for deployment instructions.
+Coming soon.....
 
 ## Demo
 
-[Link to live demo]
-[Demo video/GIF]
+Coming soon.....
