@@ -53,39 +53,49 @@ def parse_html_content(html_content):
     Parse HTML content into structured sections
     """
     soup = BeautifulSoup(html_content, 'html.parser')
+
+    sidebars = soup.find_all("table", class_="sidebar")
+    for sidebar in sidebars:
+        sidebar.decompose()
     
     sections = []
     current_section = {
         "title": "Introduction",
         "content": "",
-        "level": 1
+        "level": 1,
+        "shortcuts": []
     }
     
     # Find all headings and content
     for element in soup.find_all(['h2', 'h3', 'h4', 'p', 'ul', 'ol']):
         if element.name in ['h2', 'h3', 'h4']:
             # Save previous section if it has content
-            if current_section["content"].strip():
-                sections.append(current_section)
+            sections.append(current_section)
             
             # Get heading text and clean it
             heading_text = element.get_text()
             # Remove [edit] links and brackets
             heading_text = heading_text.replace('[edit]', '').strip()
             
-            # Skip navigation sections
-            if heading_text in ['Contents', 'Navigation menu', 'See also', 'References', 'External links']:
-                continue
-            
             # Start new section
             level = int(element.name[1])  # h2 -> 2, h3 -> 3
             current_section = {
                 "title": heading_text,
                 "content": "",
-                "level": level
+                "level": level,
+                "shortcuts": []
             }
             
         elif element.name in ['p', 'ul', 'ol']:
+            if element.name == 'ul':
+                if 'plainlist' in element.parent.get('class', []):
+                    list_items = element.find_all('li')
+                    for item in list_items:
+                        shortcut = item.find('a')
+                        if shortcut:
+                            text = shortcut.get_text().strip()
+                            current_section["shortcuts"].append(text)
+                    continue
             # Add content to current section
             text = element.get_text().strip()
             # Skip very short paragraphs and navigation elements
@@ -93,8 +103,7 @@ def parse_html_content(html_content):
                 current_section["content"] += text + "\n\n"
     
     # Add last section
-    if current_section["content"].strip():
-        sections.append(current_section)
+    sections.append(current_section)
     
     return sections
 
