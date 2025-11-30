@@ -1,67 +1,52 @@
 import json
 import numpy as np
 
-with open('../data/wikipedia_mos_raw.json', 'r') as file:
-    data = json.load(file)
+
+def check_quality(sections):
+    print("\nCount by Section")
+    section_counts = {}
+    for level in range(1,5):
+        matching_items = [item for item in sections if item["level"] == level]
+        section_counts[f"Level {level}"] = len(matching_items)
+    print(section_counts)
+
+    print("\nContent Length")
+    content_lengths = [len(item['content']) for item in sections]
+    print(f"Content min: {min(content_lengths)}")
+    print(f"Content max: {max(content_lengths)}")
+    print(f"Content average length: {np.mean(content_lengths)}")
+    print(f"Number of sections with no content: {content_lengths.count(0)}")
+
+    print("\nShortcut Check")
+    shortcuts = [item['shortcuts'] for item in sections]
+    shortcut_lengths = [len(item['shortcuts']) for item in sections]
+    print(f"Number of sections with no shortcuts: {shortcut_lengths.count(0)}")
+    for shortcut in shortcuts[0:5]:
+        if len(shortcut) != 0:
+            print(f"Example: {shortcut}")
 
 
-print("Total Section Count")
-print(f"Number of sections stated in metadata: {data['metadata']['total_sections']}")
-print(f"Total number of sections: {len(data['sections'])}")
+def print_structure(sections, start_idx=0):
+    # Indented structure
+    print("\nIndented Structure:")
 
+    for section in sections[1:]:  # Skip Introduction
+        level = section['level']
+        title = section['title']
+        
+        if level == 2:
+            print(f"\n• {title}")
+        elif level == 3:
+            print(f"  - {title}")
+        elif level == 4:
+            print(f"    · {title}")
 
-print("\nCount by Section")
-sections = data['sections']
-section_counts = {}
-for level in range(1,5):
-    matching_items = [item for item in sections if item["level"] == level]
-    section_counts[f"Level {level}"] = len(matching_items)
-print(section_counts)
-
-
-print("\nContent Length")
-content_lengths = [len(item['content']) for item in sections]
-print(f"Content min: {min(content_lengths)}")
-print(f"Content max: {max(content_lengths)}")
-print(f"Content average length: {np.mean(content_lengths)}")
-print(f"Number of sections with no content: {content_lengths.count(0)}")
-
-
-print("\nShortcut Check")
-shortcuts = [item['shortcuts'] for item in sections]
-shortcut_lengths = [len(item['shortcuts']) for item in sections]
-print(f"Number of sections with no shortcuts: {shortcut_lengths.count(0)}")
-for shortcut in shortcuts[0:5]:
-    if len(shortcut) != 0:
-        print(f"Example: {shortcut}")
-
-
-print("\n" + "="*80)
-print("TOPIC HIERARCHY (excluding Introduction)")
-print("="*80)
-
-# Indented structure
-print("\nIndented Structure:")
-
-for section in sections[1:]:  # Skip Introduction
-    level = section['level']
-    title = section['title']
-    
-    if level == 2:
-        print(f"\n• {title}")
-    elif level == 3:
-        print(f"  - {title}")
-    elif level == 4:
-        print(f"    · {title}")
-
-# Tree visualization
-print("\n" + "="*80)
-print("TREE VISUALIZATION (excluding Introduction)")
-print("="*80)
 
 def print_tree(sections, start_idx=0):
-    """Print tree structure with connecting lines, handling all 4 levels"""
-    
+    print("\n" + "="*80)
+    print("TREE VISUALIZATION (excluding Introduction)")
+    print("="*80)
+
     i = start_idx
     while i < len(sections):
         section = sections[i]
@@ -112,6 +97,29 @@ def print_tree(sections, start_idx=0):
         else:
             i += 1
 
-print("\nFull Document Structure:")
-print_tree(sections, start_idx=1)  # Start at index 1 to skip Introduction
+
+if __name__ == "__main__":
+    try:
+        with open('../data/wikipedia_mos_raw.json', 'r') as file:
+            data = json.load(file)
+        
+        sections = data['sections']
+        
+        print("Total Section Count")
+        print(f"Number of sections stated in metadata: {data['metadata']['total_sections']}")
+        print(f"Total number of sections: {len(data['sections'])}")
+
+        # Quality check
+        check_quality(sections)
+        
+        # Indentation structure
+        print_structure(sections)
+
+        # Tree visualization
+        print_tree(sections, start_idx=1)  # Start at index 1 to skip Introduction
+        
+    except Exception as e:
+        print(f"\n❌ Failed to load data: {e}")
+        exit(1)
+
 
