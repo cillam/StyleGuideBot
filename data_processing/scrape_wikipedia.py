@@ -26,10 +26,10 @@ def fetch_wikipedia_mos_api():
     
     # IMPORTANT: Add User-Agent header (Wikipedia requires this)
     headers = {
-        "User-Agent": "StyleGuideBot/1.0 (Educational project; cilla.m.miller@gmail.com)"
+        "User-Agent": "StyleGuideBot/1.0 (Educational project; <EMAIL>)"
     }
     
-    print("📡 Fetching from Wikipedia API...")
+    print("Fetching from Wikipedia API...")
     print(f"   Page: {params['page']}")
     
     response = requests.get(api_url, params=params, headers=headers)
@@ -44,7 +44,7 @@ def fetch_wikipedia_mos_api():
     html_content = data["parse"]["text"]
     page_title = data["parse"]["title"]
     
-    print(f"✅ Retrieved page: {page_title}")
+    print(f"Retrieved page: {page_title}")
     
     return html_content, page_title
 
@@ -96,8 +96,10 @@ def parse_html_content(html_content):
                             text = shortcut.get_text().strip()
                             current_section["shortcuts"].append(text)
                     continue
+
             # Add content to current section
             text = element.get_text().strip()
+            
             # Skip very short paragraphs and navigation elements
             if text and len(text) > 10 and not text.startswith('Retrieved from'):
                 current_section["content"] += text + "\n\n"

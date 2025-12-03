@@ -11,11 +11,14 @@ COLLECTION_NAME = "style_guide_mos"
 
 
 def save_chroma(mos_dict):
+    # Get embeddings from OpenAI
     embedding_function = OpenAIEmbeddingFunction(
         api_key=os.getenv("OPENAI_API_KEY"),
         model_name=MODEL
     )
+    # Create persistent chromadb
     client = chromadb.PersistentClient(path="../data/chroma_db")
+    # Create collection
     collection = client.get_or_create_collection(
         name=COLLECTION_NAME,
         embedding_function=embedding_function
@@ -27,7 +30,7 @@ def save_chroma(mos_dict):
     )
     return "Data saved"
 
-
+# Stringify chortcut list
 def prepare_metadata(metadata_dict):
     metadata_copy = metadata_dict.copy()
     # Convert shortcuts list to comma-separated string
@@ -36,11 +39,14 @@ def prepare_metadata(metadata_dict):
 
 
 if __name__ == "__main__":
+    # Load environment variables
     load_dotenv(ENV_LOC)
     try:
+        # Load data
         with open('../data/chunked_mos.json', 'r') as file:
             style_guide = json.load(file)
         chunks_data = style_guide["chunks"]  # Get full chunk objects
+        # Save desired metadata
         mos_dictionary = {
             "ids": ["chunk_" + str(num) for num in range(len(chunks_data))],
             "content": [item["content"] for item in chunks_data],
