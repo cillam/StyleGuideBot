@@ -33,11 +33,11 @@ test_queries = [
 print("Testing Vector Store Retrieval")
 print("=" * 80)
 
+# Query the db
 for query in test_queries:
     print(f"\nQuery: {query}")
     print("-" * 80)
     
-    # Now you can use query_texts - Chroma will embed automatically!
     results = collection.query(
         query_texts=[query],
         n_results=3

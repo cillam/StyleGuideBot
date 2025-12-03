@@ -2,6 +2,8 @@ import json
 import numpy as np
 import datetime
 
+
+# Create metadata
 def add_metadata(source, chunks_num):
     return {
         "source": source,
@@ -10,6 +12,7 @@ def add_metadata(source, chunks_num):
     }
 
 
+# Find parent heading for levels >= 3
 def find_parent(section_list, level):
     if level > 2:
         parent_lvl = level - 1
@@ -20,6 +23,7 @@ def find_parent(section_list, level):
         return ""
 
 
+# Chunk the sections list
 def get_chunks(data):
     sections = data["sections"]
     chunk_lst = []
@@ -41,6 +45,7 @@ def get_chunks(data):
     return chunk_lst
 
 
+# Save the JSON file
 def make_json(metadata, chunks):
     chunked_data = {
         "metadata": metadata,
@@ -57,13 +62,17 @@ def make_json(metadata, chunks):
 
 if __name__ == "__main__":
     try:
+        # Load data
         with open('../data/wikipedia_mos_raw.json', 'r') as file:
             style_guide = json.load(file)
 
+        # Get chunks
         chunk_list = get_chunks(style_guide)
 
+        # Save metadata
         style_guide_metadata = add_metadata(style_guide["metadata"]["source"], len(chunk_list))
 
+        # Save JSON file
         print(make_json(style_guide_metadata, chunk_list))
 
     except Exception as e:

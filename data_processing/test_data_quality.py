@@ -2,6 +2,7 @@ import json
 import numpy as np
 
 
+# Check section count and content length
 def check_quality(sections):
     print("\nCount by Section")
     section_counts = {}
@@ -26,6 +27,7 @@ def check_quality(sections):
             print(f"Example: {shortcut}")
 
 
+# Display outline structure of MOS
 def print_structure(sections, start_idx=0):
     # Indented structure
     print("\nIndented Structure:")
@@ -42,6 +44,7 @@ def print_structure(sections, start_idx=0):
             print(f"    · {title}")
 
 
+# Display tree visualization of MOS outline
 def print_tree(sections, start_idx=0):
     print("\n" + "="*80)
     print("TREE VISUALIZATION (excluding Introduction)")
@@ -57,7 +60,6 @@ def print_tree(sections, start_idx=0):
             print(f"\n{title}")
             i += 1
         elif level == 3:
-            # Look ahead to see if this is the last level 3 under current level 2
             is_last_l3 = True
             for j in range(i + 1, len(sections)):
                 if sections[j]['level'] == 2:
@@ -70,7 +72,6 @@ def print_tree(sections, start_idx=0):
             print(f"  {connector}{title}")
             i += 1
         elif level == 4:
-            # Look ahead to see if this is the last level 4 under current level 3
             is_last_l4 = True
             for j in range(i + 1, len(sections)):
                 if sections[j]['level'] <= 3:
