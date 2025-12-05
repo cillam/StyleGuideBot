@@ -11,7 +11,8 @@ RAG-based style guide assistant with FastAPI backend and React frontend, deploye
 **Backend:**
 - FastAPI
 - LangChain
-- OpenAI API (GPT-4 + embeddings)
+- OpenAI API (embeddings)
+- Claude API (generation)
 - Chroma Vector DB
 
 **Frontend:**
@@ -65,8 +66,5 @@ Coming soon.....
 
 Coming soon.....
 
-## Copyright
-
-© 2025 Priscilla Miller. All rights reserved.
 
 This project is for portfolio and educational purposes.
