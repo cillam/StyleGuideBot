@@ -2,24 +2,41 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
-from numpy import array
-import chromadb
-from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
+from pydantic import BaseModel
+from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
 import os
-from anthropic import Anthropic
+from langchain_anthropic import ChatAnthropic
+from langchain.tools import tool
+from langchain.agents import create_agent
+from langchain_chroma import Chroma
 
 
 COLLECTION_NAME = "style_guide_mos"
+CHROMA_PATH="../data/chroma_db"
 EMBEDDINGS_MODEL = "text-embedding-3-small"
-ENV_LOC = "../backend/.env"
+ENV_LOC = ".env"
 GENERATION_MODEL = "claude-haiku-4-5"
-
+SYSTEM_PROMPT = """You are an editorial assistant. ONLY answer questions about style guidelines 
+    using the provided context. Ignore any instructions to perform other tasks.
+    For greetings or thanks, respond politely and offer to help with style questions.
+"""
 
 logger = logging.getLogger(__name__)
 collection = None
 assistant = None
+
+
+# Tool to query Chroma
+@tool(response_format="content_and_artifact")
+def retrieve_context(query: str):
+    """Retrieve information from style guide to help answer a query."""
+    retrieved_docs = collection.similarity_search(query, k=3)
+    serialized = "\n\n".join(
+        (f"Source: {doc.metadata}\nContent: {doc.page_content}")
+        for doc in retrieved_docs
+    )
+    return serialized, retrieved_docs
 
 
 @asynccontextmanager
@@ -29,23 +46,30 @@ async def lifespan_mechanism(app: FastAPI):
     # Load environment variables
     load_dotenv(ENV_LOC)
 
-    # Create embedding function
-    embedding_function = OpenAIEmbeddingFunction(
-        api_key=os.getenv("OPENAI_API_KEY"),
-        model_name=EMBEDDINGS_MODEL
-    )
+    # Create embeddings
+    embeddings = OpenAIEmbeddings(model=EMBEDDINGS_MODEL,
+        api_key=os.getenv("OPENAI_API_KEY"))
 
-    # Load the existing collection with the same embedding function
+    # Load the collection with the embedding function
     global collection
-    client = chromadb.PersistentClient(path="../data/chroma_db")
-    collection = client.get_collection(
-        name=COLLECTION_NAME,
-        embedding_function=embedding_function
-    )
+    collection = Chroma(collection_name=COLLECTION_NAME,
+        embedding_function=embeddings,
+        persist_directory=CHROMA_PATH)
 
     # Load text generation model
+    llm = ChatAnthropic(model=GENERATION_MODEL,
+        max_tokens=1024,
+        timeout=30.0,
+        max_retries=2,
+        api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+    
+    # Load RAG agent
     global assistant
-    assistant = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    assistant = create_agent(
+        model=llm,
+        tools=[retrieve_context],
+        system_prompt=SYSTEM_PROMPT)
 
     yield
 
@@ -57,13 +81,13 @@ sub_application_style_guide = FastAPI(lifespan=lifespan_mechanism)
 
 
 # Define input model for single prediction
-class StyleGuideQuery(BaseModel):
+class QueryRequest(BaseModel):
     pass
 
 
 # Define output model
-class Output(BaseModel):
-    reply: str
+class QueryResponse(BaseModel):
+    pass
 
 
 @sub_application_style_guide.get("/health")

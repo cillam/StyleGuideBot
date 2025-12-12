@@ -6,7 +6,7 @@ import chromadb
 from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
 
 MODEL = "text-embedding-3-small"
-ENV_LOC = "../backend/.env"
+ENV_LOC = ".env"
 COLLECTION_NAME = "style_guide_mos"
 
 

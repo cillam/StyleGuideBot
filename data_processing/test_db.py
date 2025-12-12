@@ -5,7 +5,7 @@ import os
 
 COLLECTION_NAME = "style_guide_mos"
 MODEL = "text-embedding-3-small"
-ENV_LOC = "../backend/.env"
+ENV_LOC = ".env"
 
 # Load environment variables
 load_dotenv(ENV_LOC)
