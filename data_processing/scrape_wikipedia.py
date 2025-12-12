@@ -139,7 +139,7 @@ def scrape_wikipedia_mos():
         }
         
         # Save to JSON
-        output_dir = "../data"
+        output_dir = "./data"
         os.makedirs(output_dir, exist_ok=True)
         
         output_file = os.path.join(output_dir, "wikipedia_mos_raw.json")

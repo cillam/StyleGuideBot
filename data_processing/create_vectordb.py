@@ -17,7 +17,7 @@ def save_chroma(mos_dict):
         model_name=MODEL
     )
     # Create persistent chromadb
-    client = chromadb.PersistentClient(path="../data/chroma_db")
+    client = chromadb.PersistentClient(path="./data/chroma_db")
     # Create collection
     collection = client.get_or_create_collection(
         name=COLLECTION_NAME,
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     load_dotenv(ENV_LOC)
     try:
         # Load data
-        with open('../data/chunked_mos.json', 'r') as file:
+        with open('./data/chunked_mos.json', 'r') as file:
             style_guide = json.load(file)
         chunks_data = style_guide["chunks"]  # Get full chunk objects
         # Save desired metadata

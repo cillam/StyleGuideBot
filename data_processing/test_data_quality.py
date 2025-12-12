@@ -101,7 +101,7 @@ def print_tree(sections, start_idx=0):
 
 if __name__ == "__main__":
     try:
-        with open('../data/wikipedia_mos_raw.json', 'r') as file:
+        with open('./data/wikipedia_mos_raw.json', 'r') as file:
             data = json.load(file)
         
         sections = data['sections']

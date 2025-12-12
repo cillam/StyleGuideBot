@@ -17,7 +17,7 @@ embedding_function = OpenAIEmbeddingFunction(
 )
 
 # Load the existing collection with the same embedding function
-client = chromadb.PersistentClient(path="../data/chroma_db")
+client = chromadb.PersistentClient(path="./data/chroma_db")
 collection = client.get_collection(
     name=COLLECTION_NAME,
     embedding_function=embedding_function
