@@ -5,7 +5,7 @@ import os
 
 COLLECTION_NAME = "style_guide_mos"
 MODEL = "text-embedding-3-small"
-ENV_LOC = "../backend/.env"
+ENV_LOC = ".env"
 
 # Load environment variables
 load_dotenv(ENV_LOC)
@@ -17,7 +17,7 @@ embedding_function = OpenAIEmbeddingFunction(
 )
 
 # Load the existing collection with the same embedding function
-client = chromadb.PersistentClient(path="../data/chroma_db")
+client = chromadb.PersistentClient(path="./data/chroma_db")
 collection = client.get_collection(
     name=COLLECTION_NAME,
     embedding_function=embedding_function

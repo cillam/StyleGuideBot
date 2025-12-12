@@ -51,7 +51,7 @@ def make_json(metadata, chunks):
         "metadata": metadata,
         "chunks": chunks
     }
-    filename = "../data/chunked_mos.json"
+    filename = "./data/chunked_mos.json"
     try:
         with open(filename, 'w') as json_file:
             json.dump(chunked_data, json_file, indent=4) 
@@ -63,7 +63,7 @@ def make_json(metadata, chunks):
 if __name__ == "__main__":
     try:
         # Load data
-        with open('../data/wikipedia_mos_raw.json', 'r') as file:
+        with open('./data/wikipedia_mos_raw.json', 'r') as file:
             style_guide = json.load(file)
 
         # Get chunks
