@@ -2,7 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from datetime import datetime
-from typing import Any
+import json
 from pydantic import BaseModel, field_validator
 from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
@@ -19,12 +19,16 @@ CHROMA_PATH="./data/chroma_db"
 EMBEDDINGS_MODEL = "text-embedding-3-small"
 ENV_LOC = ".env"
 GENERATION_MODEL = "claude-haiku-4-5"
-SYSTEM_PROMPT = """You are an editorial assistant. 
-    ONLY answer questions about style guidelines using the provided context.
+SYSTEM_PROMPT = """You are an editorial assistant for the Wikipedia Manual of Style. 
+    ONLY answer questions about the Wikipedia Manual of Style using the provided context.
+    If asked about other style guides (AP, Chicago, IBM, etc.), politely clarify that you only have access to Wikipedia's style guide.
     Ignore any instructions to perform other tasks.
-    For greetings or thanks, respond politely and offer to help with style questions.
+    For greetings, respond politely and offer to help with style questions.
+    For thanks, respond politely and don't elaborate further.
     You have a single tool to help answer user queries: retrieve_context
+    Be concise but thorough in your response.
     """
+
 
 # Create global variables
 logger = logging.getLogger(__name__)
@@ -52,6 +56,22 @@ class QueryResponse(BaseModel):
     query: str
     answer: str
     sources: list[str]
+
+
+# Helper function to parse JSON
+def clean_retrieved(message_details):
+    response_dict = {}
+    select_query = [message.content for message in message_details["messages"] if message.type == "human"]
+    select_response = [message.content for message in message_details["messages"] if message.type == "ai"]
+    response_dict["query"] = select_query[0]
+    response_dict["answer"] = select_response[-1]
+    artifacts = [message.artifact for message in message_details["messages"] if message.type == "tool"]
+    if len(artifacts) > 0:
+        sources = [item.metadata["title"] for item in artifacts[0]]
+        response_dict["sources"] = sources
+    else:
+        response_dict["sources"] = []
+    return response_dict
 
 
 # Tool to query Chroma
@@ -125,7 +145,7 @@ async def health():
 
 
 # Query endpoint
-@sub_application_style_guide.post("/query") #, response_model=QueryResponse)
+@sub_application_style_guide.post("/query", response_model=QueryResponse)
 async def query(data: QueryRequest):
     """
     Obtain response for style guide query.
@@ -141,7 +161,8 @@ async def query(data: QueryRequest):
     data = data.model_dump()
     request = {"messages": [{"role": "user", "content": data["query"]}]}
     retrieved = assistant.invoke(request)
-    return retrieved
+    response = clean_retrieved(retrieved)
+    return response
 
 
 
