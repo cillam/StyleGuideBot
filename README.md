@@ -44,7 +44,6 @@ This project uses content from the [Wikipedia Manual of Style](https://en.wikipe
 
 ### Backend
 ```bash
-cd backend
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
