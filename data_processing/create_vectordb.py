@@ -30,7 +30,7 @@ def save_chroma(mos_dict):
     )
     return "Data saved"
 
-# Stringify chortcut list
+# Stringify shortcut list
 def prepare_metadata(metadata_dict):
     metadata_copy = metadata_dict.copy()
     # Convert shortcuts list to comma-separated string
