@@ -94,7 +94,12 @@ async def lifespan_mechanism(app: FastAPI):
     logging.info("Starting up  API")
 
     # Load environment variables
-    load_dotenv(ENV_LOC)
+    environment = os.getenv("ENVIRONMENT", "local")
+
+    if environment == "local":
+        load_dotenv(ENV_LOC)
+    
+    logging.info(f"Running in {environment} environment")
 
     # Create embeddings
     embeddings = OpenAIEmbeddings(model=EMBEDDINGS_MODEL,
@@ -114,8 +119,19 @@ async def lifespan_mechanism(app: FastAPI):
         api_key=os.getenv("ANTHROPIC_API_KEY"))
 
     
+    # Get appropriate database URL based on environment
+    if environment == "production":
+        db_url = os.getenv("AWS_DATABASE_URL")
+        logging.info("Using AWS RDS for checkpointer")
+    else:
+        db_url = os.getenv("DATABASE_URL")
+        logging.info("Using local PostgreSQL for checkpointer")
+    
+    if not db_url:
+        raise ValueError(f"Database URL not set for {environment} environment!")
+    
+
     # Load RAG agent
-    db_url = os.getenv("DATABASE_URL")
     with PostgresSaver.from_conn_string(db_url) as checkpointer:
         checkpointer.setup()
         
@@ -169,15 +185,8 @@ async def query(data: QueryRequest):
     """
     data = data.model_dump()
     request = {"messages": [{"role": "user", "content": data["query"]}]}
-    
     config = {"configurable": {"thread_id": data["session_id"]}}
-    
-    retrieved = assistant.invoke(request, config)
-    
-    # Add this to see what we're getting
-    print("RETRIEVED:", retrieved)
-    print("MESSAGES:", retrieved.get("messages", []))
-    
+    retrieved = assistant.invoke(request, config)   
     response = clean_retrieved(retrieved)
     return response
 
