@@ -44,8 +44,8 @@ This project uses content from the [Wikipedia Manual of Style](https://en.wikipe
 
 ### Backend
 ```bash
-python -m venv venv
-source venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn backend.main:app --reload
 ```
