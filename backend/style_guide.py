@@ -11,6 +11,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain.tools import tool
 from langchain.agents import create_agent
 from langchain_chroma import Chroma
+from langgraph.checkpoint.postgres import PostgresSaver
 
 
 # Set constants
@@ -41,6 +42,7 @@ assistant = None
 # Define input model for style guide query
 class QueryRequest(BaseModel):
     query: str
+    session_id: str
 
     @field_validator('query', mode='before')
     @classmethod
@@ -64,11 +66,11 @@ def clean_retrieved(message_details):
     response_dict = {}
     select_query = [message.content for message in message_details["messages"] if message.type == "human"]
     select_response = [message.content for message in message_details["messages"] if message.type == "ai"]
-    response_dict["query"] = select_query[0]
+    response_dict["query"] = select_query[-1]
     response_dict["answer"] = select_response[-1]
     artifacts = [message.artifact for message in message_details["messages"] if message.type == "tool"]
     if len(artifacts) > 0:
-        sources = [item.metadata["title"] for item in artifacts[0]]
+        sources = [item["metadata"]["title"] for item in artifacts[0]]
         response_dict["sources"] = sources
     else:
         response_dict["sources"] = []
@@ -113,13 +115,19 @@ async def lifespan_mechanism(app: FastAPI):
 
     
     # Load RAG agent
-    global assistant
-    assistant = create_agent(
-        model=llm,
-        tools=[retrieve_context],
-        system_prompt=SYSTEM_PROMPT)
+    db_url = os.getenv("DATABASE_URL")
+    with PostgresSaver.from_conn_string(db_url) as checkpointer:
+        checkpointer.setup()
+        
+        global assistant
+        assistant = create_agent(
+            model=llm,
+            tools=[retrieve_context],
+            system_prompt=SYSTEM_PROMPT,
+            checkpointer=checkpointer)
 
-    yield
+        yield
+
 
     logging.info("Shutting down API")
 
@@ -161,9 +169,18 @@ async def query(data: QueryRequest):
     """
     data = data.model_dump()
     request = {"messages": [{"role": "user", "content": data["query"]}]}
-    retrieved = assistant.invoke(request)
+    
+    config = {"configurable": {"thread_id": data["session_id"]}}
+    
+    retrieved = assistant.invoke(request, config)
+    
+    # Add this to see what we're getting
+    print("RETRIEVED:", retrieved)
+    print("MESSAGES:", retrieved.get("messages", []))
+    
     response = clean_retrieved(retrieved)
     return response
+
 
 
 
