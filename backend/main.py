@@ -1,6 +1,7 @@
 from contextlib import AsyncExitStack
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 
-from fastapi import FastAPI
 
 from backend.style_guide import lifespan_mechanism, sub_application_style_guide
 
@@ -14,6 +15,7 @@ StyleGuideBot app is a FastAPI application that supports the following endpoints
 * bot/openapi.json
 """
 
+
 async def main_lifespan(app: FastAPI):
     async with AsyncExitStack() as stack:
         # Manage the lifecycle of sub_app
@@ -26,8 +28,13 @@ async def main_lifespan(app: FastAPI):
 app = FastAPI(lifespan=main_lifespan, description=description)
 
 
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.mount("/bot", sub_application_style_guide)
-
-
-# /docs endpoint is defined by FastAPI automatically
-# /openapi.json returns a json object automatically by FastAPI
