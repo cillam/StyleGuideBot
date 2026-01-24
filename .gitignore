@@ -58,3 +58,13 @@ Thumbs.db
 .coverage
 htmlcov/
 sources/
+
+# Deployment files
+embedding-lambda.zip
+lambda-trust-policy.json
+package/
+lambda_package/
+response.json
+embedding-response.json
+deploy-lambda.sh
+*.zip
