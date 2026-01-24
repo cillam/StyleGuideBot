@@ -201,37 +201,34 @@ def increment_daily_query_count(checkpointer):
 
 def verify_recaptcha(token: str) -> bool:
     """Verify reCAPTCHA token by calling the Embedding Lambda."""
-     # TEMPORARY: Skip verification for testing
-    return True
-
-    # if not SECRETS:
-    #     # Local development - skip verification
-    #     return True
+    if not SECRETS:
+        # Local development - skip verification
+        return True
     
-    # try:
-    #     lambda_client = boto3.client('lambda')
-    #     response = lambda_client.invoke(
-    #         FunctionName='EmbeddingLambda',
-    #         InvocationType='RequestResponse',
-    #         Payload=json.dumps({
-    #             'action': 'verify_recaptcha',
-    #             'token': token,
-    #             'secret_key': SECRETS['RECAPTCHA_SECRET_KEY']
-    #         })
-    #     )
+    try:
+        lambda_client = boto3.client('lambda')
+        response = lambda_client.invoke(
+            FunctionName='EmbeddingLambda',
+            InvocationType='RequestResponse',
+            Payload=json.dumps({
+                'action': 'verify_recaptcha',
+                'token': token,
+                'secret_key': SECRETS['RECAPTCHA_SECRET_KEY']
+            })
+        )
         
-    #     result = json.loads(response['Payload'].read())
+        result = json.loads(response['Payload'].read())
         
-    #     if result.get('valid'):
-    #         logger.info(f"reCAPTCHA verification passed with score: {result.get('score')}")
-    #         return True
-    #     else:
-    #         logger.warning(f"reCAPTCHA verification failed: {result}")
-    #         return False
+        if result.get('valid'):
+            logger.info(f"reCAPTCHA verification passed with score: {result.get('score')}")
+            return True
+        else:
+            logger.warning(f"reCAPTCHA verification failed: {result}")
+            return False
             
-    # except Exception as e:
-    #     logger.error(f"Error verifying reCAPTCHA: {e}")
-    #     return False  # Fail closed
+    except Exception as e:
+        logger.error(f"Error verifying reCAPTCHA: {e}")
+        return False  # Fail closed
 #----------------
 
 
