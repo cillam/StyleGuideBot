@@ -1,0 +1,14 @@
+fastapi
+mangum
+langchain
+langchain-aws
+langchain-chroma
+langgraph
+langgraph-checkpoint-postgres
+python-dotenv
+pydantic
+slowapi
+requests
+psycopg[binary]
+chromadb
+boto3
