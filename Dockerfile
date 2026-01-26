@@ -1,7 +1,7 @@
 # Stage 1: Build dependencies
 FROM public.ecr.aws/lambda/python:3.10 AS builder
 
-# Install build dependencies (C compilers + Rust)
+# Install build dependencies
 RUN yum install -y gcc gcc-c++ make wget tar gzip
 
 # Install newer SQLite from source
