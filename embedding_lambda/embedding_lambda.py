@@ -4,6 +4,7 @@ import boto3
 import requests
 from openai import OpenAI
 
+
 # Get secrets from Secrets Manager
 def get_secret():
     secret_name = "styleguidebot/embedding-lambda"
@@ -21,6 +22,8 @@ def get_secret():
 secrets = get_secret()
 openai_client = OpenAI(api_key=secrets['OPENAI_API_KEY'])
 
+
+# Verify reCAPTCHA function
 def verify_recaptcha(token: str, secret_key: str) -> dict:
     """Verify reCAPTCHA token with Google."""
     try:
@@ -41,6 +44,7 @@ def verify_recaptcha(token: str, secret_key: str) -> dict:
     except Exception as e:
         return {'valid': False, 'error': str(e)}
 
+
 def handler(event, context):
     """
     Handle both embedding and reCAPTCHA verification.
@@ -54,7 +58,7 @@ def handler(event, context):
         Output: {"valid": true/false, "score": 0.9}
     """
     try:
-        action = event.get('action', 'embed')  # Default to embed for backwards compatibility
+        action = event.get('action', 'embed') 
         
         if action == 'verify_recaptcha':
             token = event['token']
