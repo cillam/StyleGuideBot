@@ -5,22 +5,8 @@ import requests
 from openai import OpenAI
 
 
-# Get secrets from Secrets Manager
-def get_secret():
-    secret_name = "styleguidebot/embedding-lambda"
-    region_name = "us-east-1"
-    
-    session = boto3.session.Session()
-    client = session.client(
-        service_name='secretsmanager',
-        region_name=region_name
-    )
-    
-    response = client.get_secret_value(SecretId=secret_name)
-    return json.loads(response['SecretString'])
-
-secrets = get_secret()
-openai_client = OpenAI(api_key=secrets['OPENAI_API_KEY'])
+# Load OpenAI client
+openai_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 
 # Verify reCAPTCHA function
