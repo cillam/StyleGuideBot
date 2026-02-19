@@ -1,4 +1,5 @@
 import CitationCard from './CitationCard';
+import ReactMarkdown from 'react-markdown';
 
 export default function Message({ type, content, sources }) {
   const isUser = type === 'user';
@@ -7,7 +8,7 @@ export default function Message({ type, content, sources }) {
     <div className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'} mb-6`}>
       {/* Bot Avatar */}
       {!isUser && (
-<div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
           SG
         </div>
       )}
@@ -21,7 +22,13 @@ export default function Message({ type, content, sources }) {
               : 'bg-white text-gray-800 border border-gray-200 rounded-bl-md'
           }`}
         >
-          <p className="whitespace-pre-wrap leading-relaxed">{content}</p>
+          {isUser ? (
+            <p className="whitespace-pre-wrap leading-relaxed">{content}</p>
+          ) : (
+            <div className="[&>p]:mb-3 [&>h1]:mb-2 [&>h2]:mb-2 [&>h3]:mb-2 [&>ul]:mb-3 [&>ul]:list-disc [&>ul]:ml-5 [&>ol]:mb-3 [&>ol]:list-decimal [&>ol]:ml-5 [&>li]:mb-1">
+              <ReactMarkdown>{content}</ReactMarkdown>
+            </div>
+          )}
         </div>
         {!isUser && <CitationCard sources={sources} />}
       </div>

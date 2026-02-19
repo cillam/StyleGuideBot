@@ -17,11 +17,11 @@ User Query
     ↓
 [API Gateway] → Rate limiting
     ↓
-[Main Lambda (in VPC)]
+[Main Lambda]
     ├→ [Embedding Lambda] → OpenAI embeddings
     ├→ [Chroma Vector DB] → Semantic search (S3)
-    ├→ [Bedrock Claude] → Answer generation (VPC endpoint)
-    └→ [PostgreSQL RDS] → Conversation state (VPC)
+    ├→ [Bedrock Claude] → Answer generation
+    └→ [DynamoDB] → Conversation state + usage tracking
 ```
 
 ## Tech Stack
@@ -31,8 +31,8 @@ User Query
 - **LLM:** AWS Bedrock (Claude Sonnet 4.5)
 - **Embeddings:** OpenAI text-embedding-3-small
 - **Vector Database:** Chroma
-- **Conversation Memory:** PostgreSQL
-- **Agent Framework:** LangGraph with checkpointing
+- **Conversation Memory:** DynamoDB with LangGraph checkpointing
+- **Agent Framework:** LangGraph
 
 ### Frontend
 - **Framework:** React 18 with Vite
@@ -43,21 +43,18 @@ User Query
 ### Infrastructure (AWS)
 - **Compute:** Lambda (main app + embedding function)
 - **API:** API Gateway
-- **Storage:** S3 (vector database storage)
+- **Storage:** S3 (vector database)
 - **Frontend Hosting:** AWS Amplify
-- **Database:** RDS PostgreSQL (conversation state)
-- **Networking:** VPC with security groups and endpoints
-- **Secrets:** Secrets Manager
+- **Database:** DynamoDB (conversation state + usage tracking)
 - **AI:** Bedrock (Claude access)
 
 ### Security Features
 - **reCAPTCHA v3:** Bot protection 
 - **Rate Limiting:** 
-  - 40 requests/hour per IP
-  - 20 requests/hour per session
-  - 500 requests/day global limit
-- **VPC Isolation:** Lambda runs in private VPC
-- **Secrets Management:** AWS Secrets Manager
+  - 20 requests/session (frontend)
+  - 40 requests/hour per IP (backend)
+  - 500 requests/day global limit (backend)
+- **Secrets Management:** Lambda environment variables
 - **HTTPS:** All traffic encrypted via Amplify and API Gateway
 
 ## Project Structure
@@ -102,8 +99,9 @@ This project uses content from the [Wikipedia Manual of Style](https://en.wikipe
 - ✅ **Cited Answers:** Every response includes source sections from the Manual of Style
 - ✅ **Conversation Memory:** Maintains context across multiple questions
 - ✅ **Rate Limiting:** Prevents abuse with multi-tier rate limits
-- ✅ **Security:** reCAPTCHA verification and VPC isolation
+- ✅ **Security:** reCAPTCHA verification
 - ✅ **Responsive Design:** Works on desktop, tablet, and mobile
+
 
 ## Limitations & Future Enhancements
 
